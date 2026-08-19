@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Stretch">
+<meta name="theme-color" content="#15242E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>Stretch &amp; Mobility — 70.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F6F7; --ink:#15242E; --muted:#6B7B85; --card:#FFFFFF; --line:#DDE4E7;
+  --acc:#2E7D4F; --acc-soft:#E4F1E9;
+  --shadow:0 2px 10px rgba(21,36,46,.07);
+  --radius:16px;
+  --safe: env(safe-area-inset-bottom, 0px);
+}
+[data-r="D"]{--acc:#C24E14; --acc-soft:#FBEADF;}
+[data-r="A"]{--acc:#2E7D4F; --acc-soft:#E4F1E9;}
+[data-r="B"]{--acc:#8A6420; --acc-soft:#F5EEDC;}
+[data-r="C"]{--acc:#1273A5; --acc-soft:#E3F0F7;}
+[data-r="E"]{--acc:#B03030; --acc-soft:#FBEAEA;}
+[data-r="P"]{--acc:#5E4B9E; --acc-soft:#ECE9F6;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.5;
+  padding-bottom:calc(50px + var(--safe));-webkit-font-smoothing:antialiased;}
+.wrap{max-width:600px;margin:0 auto;padding:0 14px;}
+header{padding:22px 0 4px;}
+h1{font-family:'Archivo',sans-serif;font-weight:800;font-size:24px;margin:0;letter-spacing:-.2px;}
+h1 em{font-style:normal;color:var(--acc);}
+.sub{color:var(--muted);margin:2px 0 0;font-size:13px;font-weight:500;}
+
+/* routine picker */
+.picker{display:flex;gap:7px;margin:16px 0 14px;overflow-x:auto;padding-bottom:3px;
+  scrollbar-width:none;-ms-overflow-style:none;}
+.picker::-webkit-scrollbar{display:none;}
+.pill{flex:0 0 auto;border:1.5px solid var(--line);background:#fff;border-radius:999px;
+  padding:9px 15px;font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;
+  color:var(--muted);cursor:pointer;transition:all .16s;white-space:nowrap;}
+.pill .k{display:inline-block;font-size:11px;opacity:.75;margin-right:5px;letter-spacing:.05em;}
+.pill.on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:var(--shadow);}
+.pill:focus-visible{outline:3px solid var(--acc);outline-offset:2px;}
+
+/* header blurb */
+.blurb{background:var(--acc-soft);border-left:3px solid var(--acc);border-radius:0 10px 10px 0;
+  padding:10px 13px;font-size:13px;line-height:1.5;margin-bottom:14px;}
+.blurb b{font-family:'Archivo',sans-serif;}
+
+/* control bar */
+.ctrl{position:sticky;top:6px;z-index:20;background:var(--card);border-radius:var(--radius);
+  box-shadow:0 4px 18px rgba(21,36,46,.13);padding:13px 15px;margin-bottom:14px;}
+.ctrl-row{display:flex;align-items:center;gap:12px;}
+.big-time{font-family:'Archivo',sans-serif;font-weight:800;font-size:38px;line-height:1;
+  font-variant-numeric:tabular-nums;min-width:104px;}
+.big-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.6px;margin-top:4px;min-height:14px;}
+.btns{margin-left:auto;display:flex;gap:7px;}
+.btn{border:none;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;
+  border-radius:999px;padding:12px 20px;transition:transform .1s ease,background .15s;}
+.btn:active{transform:scale(.96);}
+.btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+.btn-go{background:var(--acc);color:#fff;}
+.btn-go.paused{background:var(--ink);}
+.btn-reset{background:#EEF1F3;color:var(--ink);font-size:13px;padding:12px 13px;}
+.dots{display:flex;gap:5px;margin-top:11px;flex-wrap:wrap;}
+.dot-step{width:11px;height:11px;border-radius:50%;background:#E3E8EA;transition:all .25s;}
+.dot-step.done{background:var(--acc);opacity:.5;}
+.dot-step.now{background:var(--acc);opacity:1;animation:pulse 1.1s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+.togs{display:flex;gap:6px;margin-top:11px;}
+.tog{flex:1;border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:10px;
+  padding:8px 3px;font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:12px;
+  cursor:pointer;transition:all .15s;}
+.tog.on{border-color:var(--ink);color:var(--ink);background:#F2F5F6;}
+.tog:focus-visible{outline:3px solid var(--acc);outline-offset:2px;}
+
+/* exercise cards */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+  margin-bottom:10px;overflow:hidden;border-left:6px solid var(--acc);cursor:pointer;transition:box-shadow .2s;}
+.card.key{border-left-width:6px;}
+.card.active{box-shadow:0 0 0 3px var(--acc),0 6px 20px rgba(21,36,46,.18);}
+.card-top{display:flex;align-items:center;gap:11px;padding:11px 13px;}
+.fig{width:60px;height:48px;flex:0 0 60px;color:var(--acc);}
+.fig svg{width:100%;height:100%;}
+.card-info{flex:1;min-width:0;}
+.card-name{font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;line-height:1.2;
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.tick{display:none;color:var(--acc);font-size:16px;}
+.card.done .tick{display:inline;}
+.chip{display:inline-block;margin-top:3px;font-size:12px;font-weight:600;padding:2px 9px;
+  border-radius:999px;background:var(--acc-soft);color:var(--acc);}
+.keytag{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--ink);color:#fff;padding:2px 7px;border-radius:4px;}
+.phase{font-size:12.5px;font-weight:600;color:var(--acc);margin-top:3px;min-height:0;}
+.ring-wrap{position:relative;width:58px;height:58px;flex:0 0 58px;}
+.ring-btn{position:absolute;inset:0;border:none;border-radius:50%;background:transparent;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;color:var(--ink);}
+.ring-btn:focus-visible{outline:3px solid var(--acc);outline-offset:2px;}
+.ring-btn .play{width:0;height:0;border-style:solid;border-width:10px 0 10px 16px;
+  border-color:transparent transparent transparent currentColor;margin-left:4px;opacity:.55;}
+.card.active .ring-btn .play{display:none;}
+.ring-num{display:none;font-variant-numeric:tabular-nums;}
+.card.active .ring-num{display:block;}
+svg.ring{position:absolute;inset:0;transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:#EDF0F1;stroke-width:4.5;}
+.ring-fg{fill:none;stroke:var(--acc);stroke-width:4.5;stroke-linecap:round;
+  stroke-dasharray:150.8;stroke-dashoffset:150.8;transition:stroke-dashoffset .2s linear;}
+.card.ready .ring-fg{stroke:#C9A227;}
+.how{display:none;padding:0 14px 13px;font-size:13.5px;line-height:1.6;color:#3E4E58;}
+.card.open .how{display:block;}
+.how .cue{display:block;margin-top:7px;font-weight:600;color:var(--acc);font-size:12.5px;}
+
+/* progress */
+.pcard{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:11px;}
+.ptitle{font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin:0 0 11px;}
+.stat-row{display:flex;gap:8px;text-align:center;}
+.stat{flex:1;}
+.stat .n{font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;line-height:1.1;}
+.stat .l{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.dow{text-align:center;font-size:10.5px;font-weight:700;color:var(--muted);padding-bottom:2px;}
+.gd{aspect-ratio:1/1;border-radius:8px;background:#EEF1F3;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:700;color:var(--muted);}
+.gd.hit{background:#2E7D4F;color:#fff;}
+.gd.today{box-shadow:0 0 0 2px #C24E14;}
+.hist{list-style:none;margin:0;padding:0;}
+.hist li{display:flex;justify-content:space-between;gap:9px;padding:8px 0;
+  border-bottom:1px solid #F0F2F4;font-weight:600;font-size:14px;}
+.hist li:last-child{border-bottom:none;}
+.hist .when{color:var(--muted);font-weight:500;white-space:nowrap;font-size:13px;}
+.empty{color:var(--muted);text-align:center;font-weight:500;padding:8px 0;font-size:14px;}
+.wipe{margin-top:12px;width:100%;border:1.5px solid var(--line);background:#fff;color:var(--muted);
+  border-radius:10px;padding:10px;font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;}
+
+/* overlay */
+#overlay{position:fixed;inset:0;background:rgba(21,36,46,.55);display:none;align-items:center;
+  justify-content:center;z-index:60;padding:22px;}
+#overlay.show{display:flex;}
+.done-box{background:#fff;border-radius:20px;padding:26px 22px;text-align:center;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.done-box h3{font-family:'Archivo',sans-serif;font-size:20px;margin:0 0 8px;}
+.done-box p{margin:0 0 16px;color:#3E4E58;font-size:14.5px;line-height:1.55;}
+.done-box .btn{background:var(--ink);color:#fff;width:100%;}
+footer{text-align:center;color:var(--muted);font-size:11.5px;padding:20px 0 8px;line-height:1.6;}
+</style>
+</head>
+<body data-r="D">
+<div class="wrap">
+<header>
+  <h1>Stretch <em>&amp;</em> Mobility</h1>
+  <p class="sub">Five routines · IRONMAN 70.3 Bolton, 6 June 2027</p>
+</header>
+
+<div class="picker" id="picker"></div>
+<div class="blurb" id="blurb"></div>
+
+<div class="ctrl">
+  <div class="ctrl-row">
+    <div>
+      <div class="big-time" id="bigTime">0:00</div>
+      <div class="big-label" id="bigLabel">Ready</div>
+    </div>
+    <div class="btns">
+      <button class="btn btn-reset" id="resetBtn">Reset</button>
+      <button class="btn btn-go" id="goBtn">Start</button>
+    </div>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="togs">
+    <button class="tog on" id="togVoice">🔊 Voice</button>
+    <button class="tog on" id="togFx">🔔 Beeps</button>
+    <button class="tog on" id="togWake">💡 Screen on</button>
+  </div>
+</div>
+
+<div id="cards"></div>
+<div id="progress" style="display:none"></div>
+
+<footer>
+  Tap a card to read the technique. Tap the ring to run one exercise on its own.<br>
+  Hold to tension, never to pain. Breathe out as you sink in.<br>
+  <a href="plan.html" style="color:#2E7D4F;font-weight:600;text-decoration:none">View the winter training plan →</a>
+</footer>
+</div>
+
+<div id="overlay"><div class="done-box">
+  <h3 id="doneTitle">Done</h3>
+  <p id="doneMsg"></p>
+  <button class="btn" id="doneClose">Close</button>
+</div></div>
+
+<script>
+/* ---------- figures ---------- */
+const S='stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"';
+const G='';
+const ICONS={
+ calf:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M96 8 L96 60"/><path ${S} d="M92 30 L66 26"/><path ${S} d="M66 26 L60 6"/><circle cx="58" cy="4" r="5" fill="currentColor"/><path ${S} d="M66 26 L46 52 L20 58"/><path ${S} d="M20 58 L14 50"/></svg>`,
+ calfbent:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M96 8 L96 60"/><path ${S} d="M92 34 L70 30"/><path ${S} d="M70 30 L64 8"/><circle cx="62" cy="6" r="5" fill="currentColor"/><path ${S} d="M70 30 L52 44 L34 58"/><path ${S} d="M34 58 L22 54"/></svg>`,
+ quad:`<svg viewBox="0 0 110 66">${G}<circle cx="52" cy="8" r="6" fill="currentColor"/><path ${S} d="M52 16 L52 38"/><path ${S} d="M52 38 L46 60"/><path ${S} d="M52 38 L68 44 L58 30"/><path ${S} d="M52 26 L66 34"/></svg>`,
+ ham:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M14 60 L44 60 L44 42"/><path ${S} d="M44 42 L74 44"/><path ${S} d="M74 44 L78 28"/><path ${S} d="M78 28 Q66 20 52 34"/><circle cx="80" cy="22" r="6" fill="currentColor"/><path ${S} d="M78 30 L96 58"/></svg>`,
+ hipflex:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M8 60 L34 60 L34 40"/><path ${S} d="M34 40 L62 44"/><path ${S} d="M62 44 L88 58"/><path ${S} d="M62 44 L60 16"/><circle cx="59" cy="10" r="6" fill="currentColor"/><path ${S} d="M60 22 L76 30"/></svg>`,
+ fig4:`<svg viewBox="0 0 110 66">${G}<circle cx="18" cy="20" r="6" fill="currentColor"/><path ${S} d="M26 22 L58 30"/><path ${S} d="M58 30 L76 16 L76 40"/><path ${S} d="M58 30 L84 48"/><path ${S} d="M64 34 L52 50"/></svg>`,
+ adduct:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M22 58 L22 34"/><path ${S} d="M22 34 L56 38"/><path ${S} d="M56 38 L92 56"/><path ${S} d="M56 38 L54 14"/><circle cx="53" cy="9" r="5" fill="currentColor"/><path ${S} d="M22 58 L10 58"/></svg>`,
+ twist:`<svg viewBox="0 0 110 66">${G}<circle cx="16" cy="30" r="6" fill="currentColor"/><path ${S} d="M24 32 L58 32"/><path ${S} d="M58 32 L82 18"/><path ${S} d="M58 32 L74 52"/><path ${S} d="M30 26 L34 12"/></svg>`,
+ pigeon:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M10 56 L44 44"/><path ${S} d="M44 44 L74 52"/><path ${S} d="M44 44 L48 18"/><circle cx="49" cy="12" r="6" fill="currentColor"/><path ${S} d="M46 28 L28 40 M48 28 L66 38"/></svg>`,
+ dog:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M14 60 L52 14"/><path ${S} d="M52 14 L92 60"/><path ${S} d="M14 60 L8 54"/><path ${S} d="M92 60 L98 54"/><circle cx="26" cy="44" r="5" fill="currentColor"/></svg>`,
+ shin:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M20 58 L60 58"/><path ${S} d="M60 58 L58 36"/><path ${S} d="M58 36 L56 14"/><circle cx="55" cy="9" r="5" fill="currentColor"/><path ${S} d="M58 24 L76 32"/><path ${S} d="M20 58 L14 50"/></svg>`,
+ chest:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M92 6 L92 60"/><circle cx="48" cy="12" r="6" fill="currentColor"/><path ${S} d="M48 20 L48 44"/><path ${S} d="M48 26 L88 22"/><path ${S} d="M48 44 L38 60 M48 44 L58 60"/></svg>`,
+ child:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M18 58 L84 58"/><path ${S} d="M30 56 Q46 30 74 46"/><circle cx="80" cy="50" r="6" fill="currentColor"/><path ${S} d="M74 46 L96 54"/></svg>`,
+ roller:`<svg viewBox="0 0 110 66">${G}<ellipse cx="76" cy="48" rx="14" ry="13" ${S}/><path ${S} d="M14 22 L60 40"/><circle cx="10" cy="19" r="5" fill="currentColor"/><path ${S} d="M32 30 L38 16"/></svg>`,
+ rollback:`<svg viewBox="0 0 110 66">${G}<ellipse cx="30" cy="46" rx="13" ry="12" ${S}/><path ${S} d="M40 40 L92 24"/><circle cx="96" cy="21" r="5" fill="currentColor"/><path ${S} d="M62 32 L58 50"/></svg>`,
+ pogo:`<svg viewBox="0 0 110 66">${G}<circle cx="55" cy="10" r="6" fill="currentColor"/><path ${S} d="M55 18 L55 40"/><path ${S} d="M55 40 L48 56 M55 40 L62 56"/><path ${S} d="M55 24 L44 34 M55 24 L66 34"/><path stroke="currentColor" stroke-width="2.4" stroke-dasharray="3 4" fill="none" opacity=".5" d="M34 56 L34 44 M76 56 L76 44"/></svg>`,
+ swingfb:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M40 58 L42 26"/><path ${S} d="M42 26 L44 10"/><circle cx="45" cy="6" r="5" fill="currentColor"/><path ${S} d="M43 16 L26 22"/><path ${S} d="M42 26 L76 42"/><path stroke="currentColor" stroke-width="2.4" stroke-dasharray="3 4" fill="none" opacity=".5" d="M56 56 Q84 46 82 22"/></svg>`,
+ swingside:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M52 58 L54 28"/><path ${S} d="M54 28 L55 10"/><circle cx="56" cy="6" r="5" fill="currentColor"/><path ${S} d="M54 30 L86 20"/><path stroke="currentColor" stroke-width="2.4" stroke-dasharray="3 4" fill="none" opacity=".5" d="M26 44 Q54 34 86 44"/></svg>`,
+ lunge:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M90 58 L84 36 L58 40"/><path ${S} d="M58 40 L38 58 L18 58"/><path ${S} d="M58 40 L54 12"/><circle cx="53" cy="7" r="5" fill="currentColor"/><path ${S} d="M55 20 L40 8 M55 20 L70 8"/></svg>`,
+ knees:`<svg viewBox="0 0 110 66">${G}<circle cx="52" cy="8" r="6" fill="currentColor"/><path ${S} d="M52 16 L52 36"/><path ${S} d="M52 36 L46 58"/><path ${S} d="M52 36 L74 34 L72 50"/><path ${S} d="M52 22 L34 28 M52 22 L70 14"/></svg>`,
+ stride:`<svg viewBox="0 0 110 66">${G}<circle cx="62" cy="9" r="6" fill="currentColor"/><path ${S} d="M60 17 L54 38"/><path ${S} d="M54 38 L74 52 L86 46"/><path ${S} d="M54 38 L30 50 L22 40"/><path ${S} d="M58 24 L78 18 M58 24 L38 22"/></svg>`,
+ heeldrop:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M20 40 L54 40 L54 60 L20 60"/><path ${S} d="M62 8 L62 60"/><path ${S} d="M46 40 L44 22"/><circle cx="43" cy="16" r="5" fill="currentColor"/><path ${S} d="M45 26 L60 24"/><path stroke="currentColor" stroke-width="2.4" stroke-dasharray="3 4" fill="none" opacity=".55" d="M34 44 L34 58"/></svg>`,
+ calfraise:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M18 58 L92 58"/><path ${S} d="M52 56 L58 48"/><path ${S} d="M55 50 L54 22"/><circle cx="53" cy="16" r="6" fill="currentColor"/><path ${S} d="M54 28 L70 34"/><path stroke="currentColor" stroke-width="2.4" stroke-dasharray="3 4" fill="none" opacity=".55" d="M76 30 L76 18"/></svg>`,
+ tib:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M18 6 L18 60"/><circle cx="30" cy="14" r="6" fill="currentColor"/><path ${S} d="M28 22 L30 44"/><path ${S} d="M30 44 L64 52"/><path ${S} d="M64 52 L72 42"/></svg>`,
+ bridge:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M12 56 L34 34 L62 40"/><path ${S} d="M62 40 L82 58"/><circle cx="10" cy="52" r="5" fill="currentColor"/><path ${S} d="M62 40 L64 20"/></svg>`,
+ clam:`<svg viewBox="0 0 110 66">${G}<circle cx="16" cy="26" r="6" fill="currentColor"/><path ${S} d="M24 28 L58 34"/><path ${S} d="M58 34 L82 22"/><path ${S} d="M58 34 L80 50"/><path stroke="currentColor" stroke-width="2.4" stroke-dasharray="3 4" fill="none" opacity=".5" d="M84 26 Q92 34 84 46"/></svg>`,
+ copen:`<svg viewBox="0 0 110 66">${G}<path ${S} d="M12 54 L48 30"/><circle cx="8" cy="57" r="5" fill="currentColor"/><path ${S} d="M48 30 L88 30"/><path ${S} d="M48 30 L70 52"/><path ${S} d="M26 42 L26 56"/></svg>`
+};
+
+/* ---------- routines ---------- */
+const R=[
+{k:"D",name:"Pre-run",full:"Routine D — Pre-run dynamic",mins:"5 min",
+ blurb:"<b>Before every single run.</b> Never static stretch cold muscles — this wakes the hips and calves up instead. Skipping it is the fastest route to a tight-calf injury.",
+ ex:[
+ {n:"Ankle pogos",i:"pogo",t:"30 sec",ph:[["Small fast bounces",30]],
+  how:"Feet together, stay on the balls of your feet and bounce lightly — like skipping without a rope. Knees stay almost straight and springy, contact with the floor is quick and quiet.",
+  cue:"Quiet feet. Think 'hot pavement'."},
+ {n:"Leg swings — front to back",i:"swingfb",t:"30 sec each",ph:[["Left leg",30],["Right leg",30]],
+  how:"Hold a wall or gate post. Swing one leg forward and back like a pendulum, letting it get gradually higher. Stand tall — no arching or twisting through the back.",
+  cue:"Relaxed swing, not a kick."},
+ {n:"Leg swings — side to side",i:"swingside",t:"20 sec each",ph:[["Left leg",20],["Right leg",20]],
+  how:"Face the wall, hands on it. Swing one leg across your body and then out to the side, keeping your hips square and your torso still.",
+  cue:"Opens the adductors — the ones that get tight on the bike."},
+ {n:"Walking lunges",i:"lunge",t:"40 sec",ph:[["Walk and lunge",40]],
+  how:"Long step forward, drop the back knee towards the ground, then step through to the other side. Chest up throughout. Eight or so each leg.",
+  cue:"Feel the front of the back hip open."},
+ {n:"High knees + heel flicks",i:"knees",t:"40 sec",ph:[["20m each, easy",40]],
+  how:"Twenty metres of high knees — quick, light, up on the toes. Then turn round and do twenty metres of heel flicks, kicking your heels up towards your backside.",
+  cue:"Light and fast beats high and heavy."},
+ {n:"Strides",i:"stride",t:"2 × 20 sec",ph:[["Stride 1",20],["Walk back",25],["Stride 2",20]],
+  how:"Build smoothly from a jog to about 85% over twenty seconds, then ease off. Tall posture, relaxed shoulders, quick turnover. Walk back fully recovered between the two.",
+  cue:"This is a mechanics drill, not a sprint."}
+]},
+{k:"A",name:"Post-run",full:"Routine A — Post-run stretch",mins:"9 min",
+ blurb:"<b>After every single run — part of the run, not an optional extra.</b> Two calf stretches, because the soleus is the muscle that bites returning runners and the straight-leg version misses it entirely.",
+ ex:[
+ {n:"Calf — straight leg",i:"calf",t:"45 sec each",key:1,ph:[["Left",45],["Right",45]],
+  how:"Hands on a wall, one leg back, that heel pressed down and the back knee locked straight. Push the hips gently forward until you feel it high in the calf.",
+  cue:"Straight knee targets the gastrocnemius."},
+ {n:"Calf — bent knee (soleus)",i:"calfbent",t:"45 sec each",key:1,ph:[["Left",45],["Right",45]],
+  how:"Same position, but now bend the back knee while keeping the heel glued to the floor. The stretch drops lower, down towards the Achilles. It will feel very different — and much tighter.",
+  cue:"The single most important stretch in this routine."},
+ {n:"Standing quad",i:"quad",t:"45 sec each",ph:[["Left",45],["Right",45]],
+  how:"Hold a wall for balance, pull one heel to your backside, knees level with each other. Squeeze the glute on that side and tuck the tailbone under.",
+  cue:"Tuck the pelvis and the stretch doubles."},
+ {n:"Hamstring — heel on step",i:"ham",t:"45 sec each",ph:[["Left",45],["Right",45]],
+  how:"Heel on a low step or kerb, leg straight, toes up. Hinge forward from the hips with a flat back rather than rounding down through the spine.",
+  cue:"Hinge from the hips, chest proud."},
+ {n:"Kneeling hip-flexor lunge",i:"hipflex",t:"45 sec each",ph:[["Left",45],["Right",45]],
+  how:"Half-kneeling, back knee down. Squeeze the glute of the kneeling leg and gently push the hip forward. Stay tall — the instinct is to lean forward, which loses the stretch.",
+  cue:"Squeeze the back glute first, then push."},
+ {n:"Figure-4 glute",i:"fig4",t:"45 sec each",ph:[["Left",45],["Right",45]],
+  how:"Lying on your back, ankle crossed over the opposite knee, then pull that thigh towards your chest. Or do it seated on a bench if you're out and about.",
+  cue:"Keep the crossed ankle flexed to protect the knee."}
+]},
+{k:"B",name:"Full stretch",full:"Routine B — Full leg & back",mins:"24 min",
+ blurb:"<b>Wednesday and Sunday evenings.</b> The long one. All of Routine A at deeper holds, plus the hips, back and shoulders. Best done an hour or so after dinner, not straight after a run.",
+ ex:[
+ {n:"Calf — straight leg",i:"calf",t:"60 sec each",ph:[["Left",60],["Right",60]],
+  how:"As Routine A but hold for a full minute. The first thirty seconds is your nervous system letting go; the real change happens in the second half.",
+  cue:"Don't cut it short at 30 seconds."},
+ {n:"Calf — bent knee (soleus)",i:"calfbent",t:"60 sec each",key:1,ph:[["Left",60],["Right",60]],
+  how:"Bent back knee, heel down. Take it deeper than you would post-run — you're warm and there's no run to follow.",
+  cue:"Your tightest muscle. Give it the full minute."},
+ {n:"Standing quad",i:"quad",t:"60 sec each",ph:[["Left",60],["Right",60]],
+  how:"Heel to backside, knees together, pelvis tucked. Lying on your front and using a strap or towel round the ankle is a good alternative here.",
+  cue:"Balance is easier lying face down."},
+ {n:"Hamstring — heel on step",i:"ham",t:"60 sec each",ph:[["Left",60],["Right",60]],
+  how:"Flat back, hinge forward, toes towards you. Breathe out on each descent and let the muscle release rather than forcing it.",
+  cue:"Never bounce. Bouncing tightens, it doesn't lengthen."},
+ {n:"Kneeling hip-flexor lunge",i:"hipflex",t:"60 sec each",ph:[["Left",60],["Right",60]],
+  how:"Half-kneeling, glute squeezed, hips pushed gently forward. For more, raise the arm on the kneeling side and lean slightly away.",
+  cue:"Hip flexors shorten all day at a desk. This undoes it."},
+ {n:"Figure-4 glute",i:"fig4",t:"60 sec each",ph:[["Left",60],["Right",60]],
+  how:"On your back, ankle over knee, thigh drawn in. Keep your head and shoulders relaxed on the floor.",
+  cue:"Breathe into the hip, don't grip the shoulders."},
+ {n:"Adductor rock-backs",i:"adduct",t:"45 sec each",ph:[["Left",45],["Right",45]],
+  how:"On all fours, extend one leg straight out to the side with the foot flat. Rock your hips slowly back towards your heel and then forward again. Eight to ten slow reps.",
+  cue:"Moving, not held. Slow and controlled."},
+ {n:"Lying spinal twist",i:"twist",t:"60 sec each",ph:[["Left",60],["Right",60]],
+  how:"On your back, arms out wide, drop both knees to one side and turn your head the other way. Let gravity do everything.",
+  cue:"Both shoulders stay on the floor if you can."},
+ {n:"Pigeon pose",i:"pigeon",t:"90 sec each",key:1,ph:[["Left",90],["Right",90]],
+  how:"Front shin across, back leg extended straight behind, hips level. Fold forward over the front leg. If it's too much for the knee, do a figure-4 on your back instead.",
+  cue:"The deepest glute and piriformis release there is."},
+ {n:"Downward dog, pedalling heels",i:"dog",t:"60 sec",ph:[["Pedal the heels",60]],
+  how:"Hands and feet on the floor, hips high. Alternately press one heel down while bending the other knee, walking on the spot slowly.",
+  cue:"Calves, hamstrings and shoulders in one shape."},
+ {n:"Ankle circles + shin stretch",i:"shin",t:"60 sec",ph:[["Circles then shins",60]],
+  how:"Thirty seconds of slow ankle circles each way. Then kneel with the tops of your feet flat on the floor and sit gently back onto your heels.",
+  cue:"Sit back slowly — shins are sensitive."},
+ {n:"Doorway chest + lat reach",i:"chest",t:"45 sec each",ph:[["Chest",45],["Overhead lat reach",45]],
+  how:"Forearm on a door frame, elbow at shoulder height, rotate your body away. Then kneel, reach both arms long on the floor and sink your chest down.",
+  cue:"Undoes both swim shoulders and desk hunch."},
+ {n:"Child's pose",i:"child",t:"60 sec",ph:[["Settle and breathe",60]],
+  how:"Knees wide, big toes together, hips back to heels, arms long in front. Ten slow breaths and you're done.",
+  cue:"Finish calm. This is the full stop."}
+]},
+{k:"C",name:"Foam roll",full:"Routine C — Foam rolling",mins:"16 min",
+ blurb:"<b>Saturday evenings, and after any long ride.</b> Slow passes, not fast scrubbing. When you find a tender spot, stop on it, breathe out, and wait for it to soften — that pause is where the benefit is.",
+ ex:[
+ {n:"Calves",i:"roller",t:"90 sec each",key:1,ph:[["Left",90],["Right",90]],
+  how:"Sit with the roller under one calf, the other leg crossed on top for extra pressure. Roll slowly from ankle to just below the knee, and rotate the leg in and out to reach all sides.",
+  cue:"Your tightest area. Give it the full time."},
+ {n:"Hamstrings",i:"roller",t:"60 sec each",ph:[["Left",60],["Right",60]],
+  how:"Roller under the back of one thigh, hands behind you taking some weight. Work from just above the knee to the base of the glute.",
+  cue:"Avoid rolling directly behind the knee."},
+ {n:"Quads",i:"roller",t:"90 sec each",ph:[["Left",90],["Right",90]],
+  how:"Face down, propped on your forearms, roller under one thigh. Work from hip to just above the knee. Bending the knee as you roll adds a useful extra bit of stretch.",
+  cue:"Cyclist's tightness lives here."},
+ {n:"Outer thigh / TFL",i:"roller",t:"60 sec each",ph:[["Left",60],["Right",60]],
+  how:"On your side, roller under the outside of the thigh, top leg forward to take some weight off. Focus on the muscle at the top near the hip rather than grinding the IT band itself.",
+  cue:"Gently. The band itself doesn't stretch."},
+ {n:"Glutes",i:"roller",t:"60 sec each",ph:[["Left",60],["Right",60]],
+  how:"Sit on the roller, cross one ankle over the opposite knee and lean into that side. Small movements — you're hunting for the tender spot, not covering distance.",
+  cue:"Find the spot, then stay and breathe."},
+ {n:"Upper back",i:"rollback",t:"60 sec",ph:[["Mid and upper back",60]],
+  how:"Roller across your upper back, arms hugged across your chest, hips lifted slightly. Roll between the shoulder blades and the base of the ribs only.",
+  cue:"Never roll the lower back. Stop at the ribs."},
+ {n:"Finish — calf & hip holds",i:"calfbent",t:"30 sec each",ph:[["Calf L",30],["Calf R",30],["Hip flexor L",30],["Hip flexor R",30]],
+  how:"Two minutes of static holds to finish: bent-knee calf stretch each side, then the kneeling hip-flexor lunge each side.",
+  cue:"Roll to release, then stretch to keep the length."}
+]},
+{k:"E",name:"Calf & hip strength",full:"Routine E — Calf, Achilles & hip",mins:"21 min",
+ blurb:"<b>Monday and Thursday, after your weights.</b> Strong calves beat stretched calves — eccentric loading is the best-evidenced protection there is for exactly your problem. <b>If you're short on time, the first two exercises are the ones that matter.</b>",
+ ex:[
+ {n:"Eccentric heel drops — straight leg",i:"heeldrop",t:"3 × 12 each",key:1,
+  ph:[["Set 1 — left, then right",80],["Rest",25],["Set 2 — left, then right",80],["Rest",25],["Set 3 — left, then right",80]],
+  how:"Stand on a step with the heels hanging off. Rise onto both toes, shift your weight to one leg, then lower that heel slowly below the step over a full three seconds. Use both legs to come back up. Twelve on the left, then twelve on the right.",
+  cue:"Three seconds down. Count it — the slow lowering is the entire point."},
+ {n:"Eccentric heel drops — bent knee",i:"heeldrop",t:"3 × 12 each",key:1,
+  ph:[["Set 1 — left, then right",80],["Rest",25],["Set 2 — left, then right",80],["Rest",25],["Set 3 — left, then right",80]],
+  how:"Exactly as above, but with the knee softly bent throughout. This shifts the work from the calf down into the soleus and Achilles — the tissue that takes the biggest hit when you're building run mileage.",
+  cue:"Bent knee, three seconds down. Don't rush these."},
+ {n:"Single-leg calf raises",i:"calfraise",t:"2 × 15 each",ph:[["Set 1 — left, then right",65],["Rest",20],["Set 2 — left, then right",65]],
+  how:"Stand on one leg, fingertips on a wall for balance only. Rise up as high as you can onto the ball of the foot, pause at the top, lower under control.",
+  cue:"Full height every rep. Pause at the top."},
+ {n:"Tibialis raises",i:"tib",t:"2 × 20",ph:[["Set 1",45],["Rest",15],["Set 2",45]],
+  how:"Stand with your back against a wall, heels a foot or so out from it. Keeping your heels down, lift your toes up towards your shins as far as they'll go, then lower slowly.",
+  cue:"Protects the shins as run mileage climbs."},
+ {n:"Single-leg glute bridge",i:"bridge",t:"2 × 12 each",ph:[["Set 1 — left, then right",70],["Rest",20],["Set 2 — left, then right",70]],
+  how:"On your back, one foot planted, the other leg extended. Drive through the heel to lift your hips, squeezing the glute at the top. Keep the hips level — don't let one side drop.",
+  cue:"Squeeze the glute, don't arch the back."},
+ {n:"Clamshells",i:"clam",t:"2 × 15 each",ph:[["Set 1 — left, then right",70],["Rest",20],["Set 2 — left, then right",70]],
+  how:"On your side, knees bent and stacked, feet together. Lift the top knee while keeping your feet touching and your hips stacked vertically. Slow and controlled.",
+  cue:"Hips must not roll backwards."},
+ {n:"Copenhagen plank",i:"copen",t:"2 × 20 sec each",ph:[["Left",20],["Right",20],["Rest",20],["Left",20],["Right",20]],
+  how:"On your side, top leg resting on a chair or bench, propped on your forearm. Lift your hips so your body is in a straight line. If that's too much, rest the knee rather than the ankle on the bench.",
+  cue:"Adductor strength. Rare, and worth having."}
+]},
+{k:"P",name:"Progress",full:"Progress",mins:"",blurb:"",ex:[]}
+];
+
+/* ---------- state ---------- */
+const RING_C=150.8;
+let cur=0, run=null, timerId=null, lastWholeSec=null, wakeLock=null;
+const doneSets=R.map(()=>new Set());
+const opts={voice:true,fx:true,wake:true};
+const $=s=>document.querySelector(s);
+const pickerEl=$("#picker"), blurbEl=$("#blurb"), cardsEl=$("#cards"), progEl=$("#progress"),
+      dotsEl=$("#dots"), bigTime=$("#bigTime"), bigLabel=$("#bigLabel"),
+      goBtn=$("#goBtn"), resetBtn=$("#resetBtn");
+const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
+const total=r=>r.ex.reduce((t,c)=>t+c.ph.reduce((a,p)=>a+p[1],0),0);
+
+/* ---------- audio ---------- */
+let AC=null;
+const audio=()=>{if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;};
+function beep(f,d,w,v){const ac=audio();if(!ac)return;
+  const o=ac.createOscillator(),g=ac.createGain();o.type="sine";o.frequency.value=f;
+  g.gain.setValueAtTime(0.0001,ac.currentTime+w);
+  g.gain.exponentialRampToValueAtTime(v||0.22,ac.currentTime+w+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+w+d);
+  o.connect(g).connect(ac.destination);o.start(ac.currentTime+w);o.stop(ac.currentTime+w+d+0.05);}
+const tickBeep=()=>beep(880,0.1,0,0.14);
+const phaseBeep=()=>beep(620,0.22,0,0.24);
+const doneBeep=()=>{beep(523,0.15,0);beep(698,0.28,0.15);};
+const finBeep=()=>{beep(523,0.14,0);beep(659,0.14,0.14);beep(784,0.34,0.28,0.26);};
+
+/* ---------- voice ---------- */
+function say(t,interrupt=true){
+  if(!opts.voice||!("speechSynthesis"in window))return;
+  try{ if(interrupt)speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);
+    const vs=speechSynthesis.getVoices();
+    const v=vs.find(x=>x.lang==="en-GB")||vs.find(x=>x.lang&&x.lang.indexOf("en")===0);
+    if(v)u.voice=v; u.rate=0.98;u.pitch=1;u.volume=1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+if("speechSynthesis"in window)speechSynthesis.getVoices();
+
+/* ---------- wake lock ---------- */
+async function lockScreen(){
+  if(!opts.wake||!("wakeLock"in navigator))return;
+  try{ wakeLock=await navigator.wakeLock.request("screen"); }catch(e){}
+}
+function unlockScreen(){ try{ if(wakeLock){wakeLock.release();wakeLock=null;} }catch(e){} }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&run&&!run.paused)lockScreen(); });
+
+/* ---------- render ---------- */
+function renderPicker(){
+  pickerEl.innerHTML=R.map((r,i)=>
+    `<button class="pill${i===cur?" on":""}" data-i="${i}">${r.k!=="P"?`<span class="k">${r.k}</span>`:""}${r.name}</button>`
+  ).join("");
+  pickerEl.querySelectorAll(".pill").forEach(b=>b.onclick=()=>{switchTo(+b.dataset.i);});
+}
+function renderCards(){
+  const r=R[cur];
+  cardsEl.innerHTML=r.ex.map((c,i)=>`
+   <div class="card${c.key?" key":""}" data-i="${i}">
+     <div class="card-top">
+       <div class="fig">${ICONS[c.i]||""}</div>
+       <div class="card-info">
+         <div class="card-name">${c.n}<span class="tick">✓</span>${c.key?'<span class="keytag">key</span>':""}</div>
+         <span class="chip">${c.t}</span>
+         <div class="phase"></div>
+       </div>
+       <div class="ring-wrap">
+         <svg class="ring" viewBox="0 0 58 58"><circle class="ring-bg" cx="29" cy="29" r="24"/>
+         <circle class="ring-fg" cx="29" cy="29" r="24"/></svg>
+         <button class="ring-btn" aria-label="Run ${c.n}"><span class="play"></span><span class="ring-num"></span></button>
+       </div>
+     </div>
+     <div class="how">${c.how}<span class="cue">▸ ${c.cue}</span></div>
+   </div>`).join("");
+  cardsEl.querySelectorAll(".card").forEach((el,i)=>{
+    el.onclick=e=>{ if(e.target.closest(".ring-btn"))return; el.classList.toggle("open"); };
+    el.querySelector(".ring-btn").onclick=e=>{e.stopPropagation();startSingle(i);};
+  });
+  dotsEl.innerHTML=r.ex.map(()=>`<span class="dot-step"></span>`).join("");
+  syncDone();
+}
+function switchTo(i){
+  clearRun(); cur=i;
+  const r=R[cur];
+  document.body.dataset.r=r.k;
+  renderPicker();
+  if(r.k==="P"){
+    cardsEl.style.display="none"; progEl.style.display="block";
+    document.querySelector(".ctrl").style.display="none";
+    blurbEl.style.display="none";
+    renderProgress();
+  }else{
+    cardsEl.style.display="block"; progEl.style.display="none";
+    document.querySelector(".ctrl").style.display="block";
+    blurbEl.style.display="block"; blurbEl.innerHTML=r.blurb;
+    renderCards();
+    bigTime.textContent=fmt(total(r)); bigLabel.textContent=r.full+" · "+r.mins;
+    goBtn.textContent="Start"; goBtn.classList.remove("paused");
+  }
+}
+function syncDone(){
+  const d=doneSets[cur];
+  cardsEl.querySelectorAll(".card").forEach((el,i)=>el.classList.toggle("done",d.has(i)));
+  dotsEl.querySelectorAll(".dot-step").forEach((el,i)=>{
+    el.classList.toggle("done",d.has(i));
+    el.classList.toggle("now",!!run&&run.card===i);
+  });
+}
+
+/* ---------- engine ---------- */
+function stopTimer(){ if(timerId){clearInterval(timerId);timerId=null;} }
+function clearRun(){
+  stopTimer(); run=null; lastWholeSec=null; unlockScreen();
+  if("speechSynthesis"in window)speechSynthesis.cancel();
+  cardsEl.querySelectorAll(".card").forEach(el=>{
+    el.classList.remove("active","ready");
+    el.querySelector(".phase").textContent="";
+    el.querySelector(".ring-fg").style.strokeDashoffset=RING_C;
+  });
+  syncDone();
+}
+function startRoutine(){
+  clearRun(); audio(); lockScreen();
+  doneSets[cur]=new Set();
+  run={type:"routine",card:0,phase:0,remain:R[cur].ex[0].ph[0][1]*1000,paused:false,lastT:performance.now()};
+  goBtn.textContent="Pause"; goBtn.classList.remove("paused");
+  beginPhase("first"); timerId=setInterval(tick,150);
+}
+function startSingle(i){
+  clearRun(); audio(); lockScreen();
+  run={type:"single",card:i,phase:0,remain:R[cur].ex[i].ph[0][1]*1000,paused:false,lastT:performance.now()};
+  goBtn.textContent="Pause"; goBtn.classList.remove("paused");
+  beginPhase("single"); timerId=setInterval(tick,150);
+}
+function announce(mode,c,ph){
+  const nm=c.n.replace(/—/g,","), secs=ph[1];
+  const side=/^(left|right)/i.test(ph[0]);
+  if(mode==="first") say("Starting "+R[cur].name+". First: "+nm+". "+ph[0]+", "+secs+" seconds.");
+  else if(mode==="single") say(nm+". "+ph[0]+", "+secs+" seconds.");
+  else if(mode==="phase"){
+    if(/^rest/i.test(ph[0])) say("Rest. "+secs+" seconds.");
+    else if(/^right/i.test(ph[0])) say("Swap sides. Right, "+secs+" seconds.");
+    else say(ph[0]+", "+secs+" seconds.");
+  }
+  else if(mode==="next") say("Next: "+nm+". "+ph[0]+", "+secs+" seconds.");
+}
+function beginPhase(mode){
+  const c=R[cur].ex[run.card], ph=c.ph[run.phase];
+  const needsReady = mode==="first"||mode==="single"||mode==="next"||(mode==="phase"&&/^right/i.test(ph[0]));
+  run.ready = needsReady?4000:0;
+  lastWholeSec = needsReady?5:Math.ceil(run.remain/1000)+1;
+  announce(mode,c,ph);
+  cardsEl.querySelectorAll(".card").forEach((el,i)=>{
+    const on=i===run.card;
+    el.classList.toggle("active",on);
+    el.classList.toggle("ready",on&&needsReady);
+    el.querySelector(".phase").textContent=on?(needsReady?"Get into position…":ph[0]):"";
+    if(!on)el.querySelector(".ring-fg").style.strokeDashoffset=RING_C;
+  });
+  syncDone();
+  cardsEl.children[run.card].scrollIntoView({behavior:"smooth",block:"center"});
+  paint();
+}
+function tick(){
+  if(!run||run.paused)return;
+  const now=performance.now(), dt=now-run.lastT; run.lastT=now;
+  const c=R[cur].ex[run.card], ph=c.ph[run.phase];
+  if(run.ready>0){
+    run.ready-=dt;
+    const rs=Math.ceil(run.ready/1000);
+    if(rs<lastWholeSec){lastWholeSec=rs; if(rs>0&&rs<=3&&opts.fx)tickBeep();}
+    if(run.ready<=0){
+      run.ready=0; lastWholeSec=Math.ceil(run.remain/1000)+1;
+      if(opts.fx)phaseBeep(); say("Go.");
+      const el=cardsEl.children[run.card];
+      el.classList.remove("ready");
+      el.querySelector(".phase").textContent=ph[0];
+    }
+    paint(); return;
+  }
+  run.remain-=dt;
+  const rs=Math.ceil(run.remain/1000);
+  if(rs<lastWholeSec){ lastWholeSec=rs; if(rs>0&&rs<=3&&opts.fx)tickBeep(); }
+  if(run.remain<=0){
+    if(run.phase<c.ph.length-1){
+      run.phase++; run.remain=c.ph[run.phase][1]*1000;
+      if(opts.fx)phaseBeep();
+      beginPhase("phase"); return;
+    }
+    doneSets[cur].add(run.card);
+    if(run.type==="single"){ if(opts.fx)doneBeep(); say("Done."); clearRun(); resetDisplay(); return; }
+    if(run.card<R[cur].ex.length-1){
+      run.card++; run.phase=0; run.remain=R[cur].ex[run.card].ph[0][1]*1000;
+      if(opts.fx)doneBeep();
+      beginPhase("next"); return;
+    }
+    finish(); return;
+  }
+  paint();
+}
+function paint(){
+  const c=R[cur].ex[run.card], ph=c.ph[run.phase];
+  const showReady=run.ready>0;
+  const ms=showReady?run.ready:run.remain;
+  const secs=Math.max(0,Math.ceil(ms/1000));
+  bigTime.textContent=fmt(ms/1000);
+  bigLabel.textContent=showReady?"Get ready":(c.n+" · "+ph[0]);
+  const el=cardsEl.children[run.card];
+  const frac=showReady?(1-run.ready/4000):(1-run.remain/(ph[1]*1000));
+  el.querySelector(".ring-fg").style.strokeDashoffset=RING_C*(1-Math.min(1,Math.max(0,frac)));
+  el.querySelector(".ring-num").textContent=secs;
+}
+function resetDisplay(){
+  bigTime.textContent=fmt(total(R[cur])); bigLabel.textContent=R[cur].full+" · "+R[cur].mins;
+  goBtn.textContent="Start"; goBtn.classList.remove("paused");
+}
+function finish(){
+  if(opts.fx)finBeep();
+  const r=R[cur];
+  say("Routine complete. Well done.");
+  clearRun(); resetDisplay();
+  logSession(r.k,r.name);
+  $("#doneTitle").textContent=r.name+" complete";
+  $("#doneMsg").textContent=FINISH[r.k]||"Nicely done.";
+  $("#overlay").classList.add("show");
+}
+const FINISH={
+ D:"Warm, loose and ready. Now go and run — easy pace, conversational the whole way.",
+ A:"That's the run properly finished. Ten minutes now saves weeks later.",
+ B:"Twenty minutes of honest work on the tightest part of you. Sleep will be better for it.",
+ C:"Rolled out and released. Follow it with a glass of water and an early night.",
+ E:"Eccentric loading done. This is the work that keeps you running through the whole block."
+};
+$("#doneClose").onclick=()=>$("#overlay").classList.remove("show");
+
+goBtn.onclick=()=>{
+  audio();
+  if(!run){ startRoutine(); return; }
+  run.paused=!run.paused;
+  if(run.paused){ goBtn.textContent="Resume"; goBtn.classList.add("paused"); bigLabel.textContent="Paused"; unlockScreen();
+    if("speechSynthesis"in window)speechSynthesis.cancel(); }
+  else { run.lastT=performance.now(); goBtn.textContent="Pause"; goBtn.classList.remove("paused"); lockScreen(); paint(); }
+};
+resetBtn.onclick=()=>{ clearRun(); doneSets[cur]=new Set(); syncDone(); resetDisplay(); };
+function togWire(id,key,el){ el.onclick=()=>{ opts[key]=!opts[key]; el.classList.toggle("on",opts[key]);
+  if(key==="voice"&&!opts.voice&&"speechSynthesis"in window)speechSynthesis.cancel();
+  if(key==="wake"){ opts.wake?lockScreen():unlockScreen(); } }; }
+togWire("togVoice","voice",$("#togVoice"));
+togWire("togFx","fx",$("#togFx"));
+togWire("togWake","wake",$("#togWake"));
+
+/* ---------- progress log ---------- */
+const KEY="nick-stretch-log";
+let memLog=[];
+async function loadLog(){
+  if(window.storage){ let r=null; try{ r=await window.storage.get(KEY); }catch(e){ r=null; }
+    if(r&&r.value){ try{ memLog=JSON.parse(r.value); return; }catch(e){} } }
+  try{ const v=localStorage.getItem(KEY); memLog=v?JSON.parse(v):[]; }catch(e){ memLog=[]; }
+}
+async function saveLog(){
+  const s=JSON.stringify(memLog);
+  if(window.storage){ try{ await window.storage.set(KEY,s); }catch(e){} }
+  try{ localStorage.setItem(KEY,s); }catch(e){}
+}
+function logSession(k,name){
+  memLog.unshift({k,name,t:Date.now()});
+  if(memLog.length>200)memLog.length=200;
+  saveLog();
+}
+const dayKey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+function streak(){
+  const days=new Set(memLog.map(e=>dayKey(new Date(e.t))));
+  let n=0, d=new Date();
+  if(!days.has(dayKey(d))) d.setDate(d.getDate()-1);
+  while(days.has(dayKey(d))){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+function renderProgress(){
+  const days=new Set(memLog.map(e=>dayKey(new Date(e.t))));
+  const wk=new Date(); wk.setDate(wk.getDate()-6);
+  const last7=memLog.filter(e=>e.t>=wk.setHours(0,0,0,0)).length;
+  const cells=[]; const today=dayKey(new Date());
+  const start=new Date(); start.setDate(start.getDate()-27);
+  const off=(start.getDay()+6)%7; start.setDate(start.getDate()-off);
+  for(let i=0;i<35;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    const k=dayKey(d), fut=d>new Date();
+    cells.push(`<div class="gd${days.has(k)?" hit":""}${k===today?" today":""}" style="${fut?"opacity:.35":""}">${d.getDate()}</div>`);
+  }
+  const hist=memLog.slice(0,12).map(e=>{
+    const d=new Date(e.t);
+    const when=d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" · "+
+               d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+    return `<li><span>${e.name}</span><span class="when">${when}</span></li>`;
+  }).join("");
+  progEl.innerHTML=`
+   <div class="pcard"><div class="stat-row">
+     <div class="stat"><div class="n">${streak()}</div><div class="l">Day streak</div></div>
+     <div class="stat"><div class="n">${last7}</div><div class="l">This week</div></div>
+     <div class="stat"><div class="n">${memLog.length}</div><div class="l">All time</div></div>
+   </div></div>
+   <div class="pcard"><h3 class="ptitle">Last five weeks</h3>
+     <div class="grid7">${["M","T","W","T","F","S","S"].map(d=>`<div class="dow">${d}</div>`).join("")}</div>
+     <div class="grid7" style="margin-top:4px">${cells.join("")}</div>
+   </div>
+   <div class="pcard"><h3 class="ptitle">Recent sessions</h3>
+     ${hist?`<ul class="hist">${hist}</ul>`:`<p class="empty">Nothing logged yet — finish a routine and it'll appear here.</p>`}
+     <button class="wipe" id="wipeBtn">Clear all history</button>
+   </div>`;
+  $("#wipeBtn").onclick=()=>{ if(confirm("Clear all logged sessions?")){ memLog=[]; saveLog(); renderProgress(); } };
+}
+
+/* ---------- go ---------- */
+(async function(){ await loadLog(); renderPicker(); switchTo(0); })();
+</script>
+</body>
+</html>
