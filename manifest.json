@@ -1,15 +1,25 @@
 {
-  "name": "Stretch & Mobility — 70.3",
+  "name": "Stretch & Mobility \u2014 70.3",
   "short_name": "Stretch",
   "description": "Five stretching, rolling and strength routines for Half Ironman training.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F4F6F7",
-  "theme_color": "#15242E",
+  "background_color": "#F7F9FA",
+  "theme_color": "#F7F9FA",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }
