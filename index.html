@@ -118,6 +118,10 @@ svg.ring{position:absolute;inset:0;transform:rotate(-90deg);}
 .how{display:none;padding:0 14px 13px;font-size:13.5px;line-height:1.6;color:#3E4E58;}
 .card.open .how{display:block;}
 .how .cue{display:block;margin-top:7px;font-weight:600;color:var(--acc);font-size:12.5px;}
+.showme{display:inline-block;margin-top:11px;padding:8px 14px;border-radius:999px;
+  background:var(--acc-soft);color:var(--acc);font-weight:700;font-size:12.5px;
+  text-decoration:none;border:1.5px solid transparent;}
+.showme:active{border-color:var(--acc);}
 
 /* progress */
 .pcard{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:11px;}
@@ -185,7 +189,7 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:20px 0 8px;
 <div id="progress" style="display:none"></div>
 
 <footer>
-  Tap a card to read the technique. Tap the ring to run one exercise on its own.<br>
+  Tap a card for the technique and a picture. Tap the ring to run one exercise on its own.<br>
   Hold to tension, never to pain. Breathe out as you sink in.<br>
   <a href="plan.html" style="color:#2E7D4F;font-weight:600;text-decoration:none">View the winter training plan →</a>
 </footer>
@@ -375,6 +379,44 @@ const R=[
 {k:"P",name:"Progress",full:"Progress",mins:"",blurb:"",ex:[]}
 ];
 
+/* ---------- image search terms ---------- */
+const SEARCH={
+ "Ankle pogos":"pogo hops ankle bounce drill runner",
+ "Leg swings — front to back":"leg swings forward backward dynamic warm up",
+ "Leg swings — side to side":"lateral leg swings dynamic warm up",
+ "Walking lunges":"walking lunge exercise form",
+ "High knees + heel flicks":"high knees heel flicks running drill",
+ "Strides":"running strides drill form",
+ "Calf — straight leg":"gastrocnemius calf stretch wall straight leg",
+ "Calf — bent knee (soleus)":"soleus calf stretch bent knee wall",
+ "Standing quad":"standing quadriceps stretch heel to buttock",
+ "Hamstring — heel on step":"hamstring stretch heel on step hip hinge",
+ "Kneeling hip-flexor lunge":"kneeling hip flexor stretch half kneeling lunge",
+ "Figure-4 glute":"figure four glute stretch lying down",
+ "Adductor rock-backs":"adductor rock back stretch all fours",
+ "Lying spinal twist":"supine spinal twist stretch knees to side",
+ "Pigeon pose":"pigeon pose hip stretch",
+ "Downward dog, pedalling heels":"downward dog pedalling heels calf stretch",
+ "Ankle circles + shin stretch":"kneeling shin stretch ankle sitting on heels",
+ "Doorway chest + lat reach":"doorway chest stretch forearm door frame",
+ "Child's pose":"childs pose yoga stretch",
+ "Calves":"foam roll calves technique",
+ "Hamstrings":"foam roll hamstrings technique",
+ "Quads":"foam roll quads face down technique",
+ "Outer thigh / TFL":"foam roll IT band outer thigh side lying",
+ "Glutes":"foam roll glutes figure four sitting on roller",
+ "Upper back":"foam roll upper back thoracic spine",
+ "Finish — calf & hip holds":"soleus calf stretch bent knee wall",
+ "Eccentric heel drops — straight leg":"eccentric heel drop calf raise step exercise",
+ "Eccentric heel drops — bent knee":"eccentric heel drop bent knee soleus step",
+ "Single-leg calf raises":"single leg calf raise exercise form",
+ "Tibialis raises":"tibialis anterior raise back to wall exercise",
+ "Single-leg glute bridge":"single leg glute bridge exercise form",
+ "Clamshells":"clamshell exercise side lying hip",
+ "Copenhagen plank":"Copenhagen plank adductor exercise"
+};
+const searchURL=n=>"https://www.google.com/search?tbm=isch&q="+encodeURIComponent((SEARCH[n]||n)+" exercise");
+
 /* ---------- state ---------- */
 const RING_C=150.8;
 let cur=0, run=null, timerId=null, lastWholeSec=null, wakeLock=null;
@@ -446,7 +488,9 @@ function renderCards(){
          <button class="ring-btn" aria-label="Run ${c.n}"><span class="play"></span><span class="ring-num"></span></button>
        </div>
      </div>
-     <div class="how">${c.how}<span class="cue">▸ ${c.cue}</span></div>
+     <div class="how">${c.how}<span class="cue">▸ ${c.cue}</span>
+       <a class="showme" href="${searchURL(c.n)}" target="_blank" rel="noopener">🔍 Show me a picture</a>
+     </div>
    </div>`).join("");
   cardsEl.querySelectorAll(".card").forEach((el,i)=>{
     el.onclick=e=>{ if(e.target.closest(".ring-btn"))return; el.classList.toggle("open"); };
